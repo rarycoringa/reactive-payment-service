@@ -1,0 +1,14 @@
+services:
+  payment:
+    build: .
+    container_name: payment
+    environment:
+      - SERVER_PORT=8282
+    ports:
+      - "8282:8282"
+    networks:
+      - reactive-ms-network
+
+networks:
+  reactive-ms-network:
+    external: true
