@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import br.edu.ufrn.payment.exception.ChargeNotFoundException;
 import br.edu.ufrn.payment.model.Charge;
 import br.edu.ufrn.payment.model.Refund;
 import br.edu.ufrn.payment.repository.ChargeRepository;
@@ -30,12 +31,13 @@ public class PaymentService {
         return chargeRepository
             .save(new Charge(orderId, amount, splitInto, cardNumber))
             .map(Charge::getId)
-            .doOnSuccess(id -> logger.info("Charge successfully done for orderId={}, orderId={}", id, orderId));
+            .doOnSuccess(id -> logger.info("Charge successfully done: id={}, orderId={}", id, orderId));
     }
 
     public Mono<String> refund(String orderId) {
         return chargeRepository
             .findByOrderId(orderId)
+            .switchIfEmpty(Mono.error(new ChargeNotFoundException()))
             .flatMap(charge -> {
                 return refundRepository.save(
                     new Refund(
@@ -45,7 +47,8 @@ public class PaymentService {
                         charge.getCardNumber()));
             })
             .map(Refund::getId)
-            .doOnSuccess(id -> logger.info("Refund successfully done for orderId={}, orderId={}", id, orderId));
+            .doOnSuccess(id -> logger.info("Refund successfully done: id={}, orderId={}", id, orderId))
+            .doOnError(err -> logger.error("Refund failed: orderId={}, reason={}", orderId, err.getMessage()));
     }
     
 }

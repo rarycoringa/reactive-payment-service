@@ -1,9 +1,9 @@
 package br.edu.ufrn.payment.exception;
 
-public class PaymentFailedException extends RuntimeException {
+public class ChargeNotFoundException extends RuntimeException {
     private static final String message = "Payment failed.";
 
-    public PaymentFailedException() {
+    public ChargeNotFoundException() {
         super(message);
     }
 }
