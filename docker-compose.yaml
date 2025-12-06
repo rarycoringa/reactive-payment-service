@@ -4,6 +4,7 @@ services:
     container_name: payment
     environment:
       - SERVER_PORT=8383
+      - SPRING_PROFILES_ACTIVE
     ports:
       - "8383:8383"
     networks:
