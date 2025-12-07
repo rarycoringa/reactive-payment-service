@@ -1,9 +1,0 @@
-package br.edu.ufrn.payment.exception;
-
-public class PaymentFailedException extends RuntimeException {
-    private static final String message = "Payment failed.";
-
-    public PaymentFailedException() {
-        super(message);
-    }
-}

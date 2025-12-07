@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import br.edu.ufrn.payment.exception.ChargeNotFoundException;
+import br.edu.ufrn.payment.exception.PaymentRefusedException;
 import br.edu.ufrn.payment.model.Charge;
 import br.edu.ufrn.payment.model.Refund;
 import br.edu.ufrn.payment.repository.ChargeRepository;
@@ -28,6 +29,12 @@ public class PaymentService {
         Integer splitInto,
         String cardNumber
     ) {
+        boolean refused = Math.random() < 0.1;
+
+        if (refused) {
+            return Mono.error(new PaymentRefusedException());
+        }
+
         return chargeRepository
             .save(new Charge(orderId, amount, splitInto, cardNumber))
             .map(Charge::getId)
