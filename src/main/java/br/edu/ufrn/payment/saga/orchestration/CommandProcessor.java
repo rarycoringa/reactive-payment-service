@@ -19,9 +19,9 @@ import reactor.core.publisher.Mono;
 
 @Configuration
 @Profile("orchestration")
-public class EventProcessor {
+public class CommandProcessor {
     
-    private static final Logger logger = LoggerFactory.getLogger(EventProcessor.class);
+    private static final Logger logger = LoggerFactory.getLogger(CommandProcessor.class);
 
     @Autowired
     private PaymentService paymentService;
