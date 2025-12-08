@@ -54,6 +54,7 @@ public class CommandProcessor {
                 command.amount(),
                 command.splitInto(),
                 command.cardNumber()))
+            .doOnSuccess(paymentEvent -> logger.info("Payment charged: {}", paymentEvent))
             .onErrorResume(
                 PaymentRefusedException.class, e -> Mono.just(
                     new Event(
@@ -76,7 +77,8 @@ public class CommandProcessor {
                 id,
                 null,
                 null,
-                null));
+                null))
+            .doOnSuccess(paymentEvent -> logger.info("Payment refunded: {}", paymentEvent));
     }
 
 }
