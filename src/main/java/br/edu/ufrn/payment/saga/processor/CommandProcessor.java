@@ -1,4 +1,4 @@
-package br.edu.ufrn.payment.saga.orchestration;
+package br.edu.ufrn.payment.saga.processor;
 
 import java.util.function.Function;
 
@@ -10,9 +10,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 import br.edu.ufrn.payment.exception.PaymentRefusedException;
-import br.edu.ufrn.payment.saga.orchestration.command.Command;
-import br.edu.ufrn.payment.saga.orchestration.event.Event;
-import br.edu.ufrn.payment.saga.orchestration.event.EventType;
+import br.edu.ufrn.payment.saga.processor.command.Command;
+import br.edu.ufrn.payment.saga.processor.event.Event;
+import br.edu.ufrn.payment.saga.processor.event.EventType;
 import br.edu.ufrn.payment.service.PaymentService;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;

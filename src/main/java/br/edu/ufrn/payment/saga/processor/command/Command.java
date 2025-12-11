@@ -1,4 +1,4 @@
-package br.edu.ufrn.payment.saga.orchestration.command;
+package br.edu.ufrn.payment.saga.processor.command;
 
 public record Command(
     CommandType type,

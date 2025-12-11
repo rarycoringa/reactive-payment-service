@@ -1,4 +1,4 @@
-package br.edu.ufrn.payment.saga.orchestration.event;
+package br.edu.ufrn.payment.saga.processor.event;
 
 public record Event(
     EventType type,
