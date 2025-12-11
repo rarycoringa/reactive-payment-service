@@ -4,8 +4,5 @@ public record Event(
     EventType type,
     String orderId,
     String paymentChargeId,
-    String paymentRefundId,
-    Double amount,
-    Integer splitInto,
-    String cardNumber
+    String paymentRefundId
 ) {}

@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
-import br.edu.ufrn.payment.exception.PaymentRefusedException;
 import br.edu.ufrn.payment.saga.processor.command.Command;
 import br.edu.ufrn.payment.saga.processor.event.Event;
 import br.edu.ufrn.payment.saga.processor.event.EventType;
@@ -29,56 +28,32 @@ public class CommandProcessor {
     @Bean
     public Function<Flux<Command>, Flux<Event>> processPaymentCommand() {
         return flux -> flux
-            .concatMap(this::process);
+            .doOnNext(command -> logger.info("Received payment command: {}", command))
+            .concatMap(this::process)
+            .doOnNext(event -> logger.info("Sending payment event: {}", event));
     }
 
     private Mono<Event> process(Command command) {
         return switch (command.type()) {
-            case CHARGE_PAYMENT -> chargePayment(command);
-            case REFUND_PAYMENT -> refundPayment(command);
+            case CHARGE_PAYMENT -> paymentService.charge(command.orderId(), command.amount(), command.splitInto(), command.cardNumber())
+                .map(id -> new Event(
+                    EventType.PAYMENT_CHARGED,
+                    command.orderId(),
+                    id,
+                    null))
+                .onErrorReturn(new Event(
+                    EventType.PAYMENT_REFUSED,
+                    command.orderId(),
+                    null,
+                    null));
+
+            case REFUND_PAYMENT -> paymentService.refund(command.orderId())
+                .map(id -> new Event(
+                    EventType.PAYMENT_REFUNDED,
+                    command.orderId(),
+                    null,
+                    id));
         };
-    }
-
-    private Mono<Event> chargePayment(Command command) {
-        return paymentService
-            .charge(
-                command.orderId(),
-                command.amount(),
-                command.splitInto(),
-                command.cardNumber())
-            .map(id -> new Event(
-                EventType.PAYMENT_CHARGED,
-                command.orderId(),
-                id,
-                null,
-                command.amount(),
-                command.splitInto(),
-                command.cardNumber()))
-            .doOnSuccess(paymentEvent -> logger.info("Payment charged: {}", paymentEvent))
-            .onErrorResume(
-                PaymentRefusedException.class, e -> Mono.just(
-                    new Event(
-                        EventType.PAYMENT_REFUSED,
-                        command.orderId(),
-                        null,
-                        null,
-                        command.amount(),
-                        command.splitInto(),
-                        command.cardNumber())));
-    }
-
-    private Mono<Event> refundPayment(Command command) {
-        return paymentService
-            .refund(command.orderId())
-            .map(id -> new Event(
-                EventType.PAYMENT_REFUNDED,
-                command.orderId(),
-                null,
-                id,
-                null,
-                null,
-                null))
-            .doOnSuccess(paymentEvent -> logger.info("Payment refunded: {}", paymentEvent));
     }
 
 }
