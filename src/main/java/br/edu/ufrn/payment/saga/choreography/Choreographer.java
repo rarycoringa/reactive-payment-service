@@ -45,18 +45,34 @@ public class Choreographer {
     private Mono<PaymentEvent> process(ProductEvent event) {
         return switch (event.type()) {
             case PRODUCT_RESERVED -> paymentService.charge(event.orderId(), event.amount(), event.splitInto(), event.cardNumber())
-                .thenReturn(new PaymentEvent(
+                .map(id -> new PaymentEvent(
                     EventType.PAYMENT_CHARGED,
                     event.orderId(),
+                    event.productId(),
+                    event.productQuantity(),
+                    event.productName(),
+                    event.productPrice(),
+                    id,
+                    event.refundId(),
                     event.amount(),
                     event.splitInto(),
-                    event.cardNumber()))
+                    event.cardNumber(),
+                    event.shippingId(),
+                    event.address()))
                 .onErrorReturn(new PaymentEvent(
                     EventType.PAYMENT_REFUSED,
                     event.orderId(),
+                    event.productId(),
+                    event.productQuantity(),
+                    event.productName(),
+                    event.productPrice(),
+                    event.chargeId(),
+                    event.refundId(),
                     event.amount(),
                     event.splitInto(),
-                    event.cardNumber()));
+                    event.cardNumber(),
+                    event.shippingId(),
+                    event.address()));
 
             case PRODUCT_UNAVAILABLE, PRODUCT_RETURNED -> Mono.empty();
                 
@@ -67,12 +83,20 @@ public class Choreographer {
     private Mono<PaymentEvent> process(ShippingEvent event) {
         return switch (event.type()) {
             case SHIPPING_REFUSED -> paymentService.refund(event.orderId())
-                .thenReturn(new PaymentEvent(
+                .map(id -> new PaymentEvent(
                     EventType.PAYMENT_REFUNDED,
                     event.orderId(),
+                    event.productId(),
+                    event.productQuantity(),
+                    event.productName(),
+                    event.productPrice(),
+                    event.chargeId(),
+                    id,
                     event.amount(),
                     event.splitInto(),
-                    event.cardNumber()));
+                    event.cardNumber(),
+                    event.shippingId(),
+                    event.address()));
                 
             case SHIPPING_ACCEPTED -> Mono.empty();
 
